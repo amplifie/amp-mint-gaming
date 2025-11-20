@@ -14,7 +14,7 @@ fi
 
 clear
 echo -e "${GREEN}====================================================${NC}"
-echo -e "${GREEN}   LINUX MINT GAMING OPTIMIZER     ${NC}"
+echo -e "${GREEN}     LINUX MINT GAMING OPTIMIZER     ${NC}"
 echo -e "${GREEN}====================================================${NC}"
 echo -e "${RED}EMPFOHLEN: Nutzen Sie Timeshift (in Mint enthalten), um ein Backup zu erstellen!${NC}"
 echo ""
@@ -38,7 +38,7 @@ fi
 echo -e "\n${GREEN}[1/5] Führe System-Update durch...${NC}"
 apt update && apt upgrade -y
 # Installiere wichtige Abhängigkeiten für Treiber-Kompilierung vorab
-apt install build-essential dkms -y
+apt install build-essential dkms software-properties-common -y # software-properties-common für add-apt-repository
 
 # ---------------------------------------------------------
 # 2. XANMOD KERNEL (Gaming Kernel)
@@ -55,10 +55,10 @@ echo "=========================================================="
 echo "Bitte wählen Sie die optimale XanMod Kernel-Version:"
 echo " "
 echo "1) XanMod LTS (6.12) - [EMPFOHLEN FÜR NVIDIA] ${GREEN}<-- STABIL & SCHNELL${NC}"
-echo "   Bietet Gaming-Performance (FSYNC) bei maximaler Treiber-Kompatibilität."
+echo "    Bietet Gaming-Performance (FSYNC) bei maximaler Treiber-Kompatibilität."
 echo " "
 echo "2) XanMod Mainline (v3/Edge) - [NUR FÜR AMD/INTEL] ${RED}RISIKO!${NC}"
-echo "   Der neuste Kernel (6.17+). Mit den neusten NV Treibern NICHT kompatibel!"
+echo "    Der neuste Kernel (6.17+). Mit den neusten NV Treibern NICHT kompatibel!"
 echo " "
 echo "3) Überspringen (Standard Mint Kernel behalten)"
 read -p "Auswahl (1-3): " kernel_choice
@@ -114,7 +114,7 @@ case $gpu_choice in
         echo -e "\n${YELLOW}Welchen NVIDIA-Treiber möchten Sie installieren?${NC}"
         echo "1) Stabil (Auto-Install) - Wählt automatisch den stabilsten Treiber."
         echo "2) Performance / Neu (Bleeding Edge) - Installiert die absolut neuste verfügbare Version."
-        echo "   (Benötigt XanMod LTS aus Schritt 2)"
+        echo "    (Benötigt XanMod LTS aus Schritt 2)"
         read -p "Auswahl (1-2): " nv_ver_choice
         
         if [[ "$nv_ver_choice" == "2" ]]; then
@@ -136,7 +136,7 @@ case $gpu_choice in
         NVIDIA_SELECTED=1
         ;;
     3)
-        echo "Überspringe GPU-Treiber..."
+        echo -e "${YELLOW}GPU-Treiber-Installation übersprungen.${NC}"
         ;;
     *)
         echo "Ungültige Eingabe, überspringe..."
@@ -181,15 +181,32 @@ else
     echo "CPU Tools übersprungen."
 fi
 
-# Optional: MangoHud
-echo -e "\n${YELLOW}--- OPTIONALE INSTALLATION: MangoHud ---${NC}"
-echo "FPS-Overlay (wie MSI Afterburner)."
-read -p "Möchten Sie MangoHud installieren? (j/n): " mangohud_choice
+# Optional: MangoHud (AKTUALISIERTE INSTALLATION ÜBER PPA)
+echo -e "\n${YELLOW}--- OPTIONALE INSTALLATION: MangoHud & GOverlay ---${NC}"
+echo "MangoHud ist das FPS-Overlay (wie MSI Afterburner), GOverlay ist das Konfigurationstool."
+read -p "Möchten Sie MangoHud & GOverlay installieren? (j/n): " mangohud_choice
 if [[ "$mangohud_choice" == "j" || "$mangohud_choice" == "J" ]]; then
-    apt install mangohud -y
-    echo -e "${YELLOW}   NUTZUNG: 'mangohud %command%' in Steam-Startoptionen.${NC}"
+    
+    # 1. 32-Bit-Architektur hinzufügen (falls in 1/5 nicht enthalten)
+    echo -e "${YELLOW}-> Aktiviere i386-Architektur für 32-Bit-Spiele...${NC}"
+    dpkg --add-architecture i386
+
+    # 2. PPA hinzufügen (von gezakovacs)
+    echo -e "${YELLOW}-> Füge das MangoHud PPA hinzu...${NC}"
+    add-apt-repository ppa:gezakovacs/ppa -y
+
+    # 3. Paketlisten aktualisieren
+    echo -e "${YELLOW}-> Aktualisiere Paketlisten...${NC}"
+    apt update
+
+    # 4. Installation von MangoHud und GOverlay
+    echo -e "${YELLOW}-> Installiere MangoHud, 32-Bit-Bibliotheken und GOverlay...${NC}"
+    apt install mangohud lib32-mangohud goverlay -y
+
+    echo -e "${GREEN}MangoHud und GOverlay installiert.${NC}"
+    echo -e "${YELLOW}    NUTZUNG: 'mangohud %command%' in Steam-Startoptionen.${NC}"
 else
-    echo "MangoHud übersprungen."
+    echo "MangoHud und GOverlay übersprungen."
 fi
 
 # Optional: PulseAudio Volume Control (pavucontrol)
@@ -304,7 +321,7 @@ fi
 # ABSCHLUSS
 # ---------------------------------------------------------
 echo -e "\n${GREEN}====================================================${NC}"
-echo -e "${GREEN}   OPTIMIERUNG ABGESCHLOSSEN!   ${NC}"
+echo -e "${GREEN}     OPTIMIERUNG ABGESCHLOSSEN!     ${NC}"
 echo -e "${GREEN}====================================================${NC}"
 echo "Bitte führen Sie jetzt einen NEUSTART durch."
 echo ""
