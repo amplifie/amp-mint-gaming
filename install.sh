@@ -33,7 +33,7 @@ if [[ "$choice" != "j" && "$choice" != "J" ]]; then
 fi
 
 # ---------------------------------------------------------
-# 1. SYSTEM UPDATE
+# 1. SYSTEM UPDATE (Prerequisites)
 # ---------------------------------------------------------
 echo -e "\n${GREEN}[1/5] Führe System-Update durch...${NC}"
 apt update && apt upgrade -y
@@ -224,9 +224,9 @@ else
     echo "Steam übersprungen."
 fi
 
-# OBLIGATORISCH: ProtonUp-Qt
+# OBLIGATORISCH: ProtonUp-Qt (KORRIGIERTE ID!)
 echo -e "\n${GREEN}Installiere ProtonUp-Qt via Flatpak (obligatorisch)...${NC}"
-flatpak install flathub net.davidotek.GtkSharpInstaller -y
+flatpak install flathub net.davidotek.pupgui2 -y
 
 # ---------------------------------------------------------
 # 5. SYSTEM TWEAKS (Optimiert)
@@ -235,6 +235,20 @@ echo -e "\n${GREEN}[5/5] Wende System-Tweaks an...${NC}"
 
 # Backup
 cp /etc/sysctl.conf /etc/sysctl.conf.bak
+
+# GRUB AUTOMATIK (NEU: Merkt sich die letzte Auswahl)
+echo "Konfiguriere GRUB, um die letzte Kernel-Auswahl zu speichern..."
+cp /etc/default/grub /etc/default/grub.bak
+# Setzt GRUB_DEFAULT auf 'saved'
+sed -i 's/^GRUB_DEFAULT=.*/GRUB_DEFAULT=saved/' /etc/default/grub
+# Fügt GRUB_SAVEDEFAULT hinzu, falls nicht vorhanden
+if ! grep -q "GRUB_SAVEDEFAULT=true" /etc/default/grub; then
+    echo "GRUB_SAVEDEFAULT=true" >> /etc/default/grub
+fi
+# Erzwingt Menü-Anzeige (damit man beim ersten Mal wählen kann)
+sed -i 's/^GRUB_TIMEOUT_STYLE=.*/GRUB_TIMEOUT_STYLE=menu/' /etc/default/grub
+sed -i 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=5/' /etc/default/grub
+update-grub
 
 # 1. VM Max Map Count
 if ! grep -q "vm.max_map_count" /etc/sysctl.conf; then
@@ -259,7 +273,6 @@ echo -e "\n${YELLOW}--- OPTIONAL: Transparent Huge Pages (THP) auf 'madvise' set
 echo "Dies ist die Standard-Einstellung von Nobara OS."
 read -p "Möchten Sie THP auf 'madvise' (empfohlen) setzen? (j/n): " thp_choice
 if [[ "$thp_choice" == "j" || "$thp_choice" == "J" ]]; then
-    cp /etc/default/grub /etc/default/grub.bak
     # Prüft, ob der Eintrag schon existiert
     if ! grep -q "transparent_hugepage=madvise" /etc/default/grub; then
         # Falls 'never' gesetzt war, ersetze es, sonst füge 'madvise' hinzu
