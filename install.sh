@@ -181,30 +181,23 @@ else
     echo "CPU Tools übersprungen."
 fi
 
-# Optional: MangoHud (AKTUALISIERTE INSTALLATION ÜBER PPA)
+# Optional: MangoHud (AKTUALISIERTE INSTALLATION ÜBER FLATPAK)
 echo -e "\n${YELLOW}--- OPTIONALE INSTALLATION: MangoHud & GOverlay ---${NC}"
 echo "MangoHud ist das FPS-Overlay (wie MSI Afterburner), GOverlay ist das Konfigurationstool."
 read -p "Möchten Sie MangoHud & GOverlay installieren? (j/n): " mangohud_choice
 if [[ "$mangohud_choice" == "j" || "$mangohud_choice" == "J" ]]; then
     
-    # 1. 32-Bit-Architektur hinzufügen (falls in 1/5 nicht enthalten)
-    echo -e "${YELLOW}-> Aktiviere i386-Architektur für 32-Bit-Spiele...${NC}"
-    dpkg --add-architecture i386
+    # 1. Installation von MangoHud-Vulkan-Layer via Flatpak (löst das 32-bit/noble Problem)
+    echo -e "${YELLOW}-> Installiere MangoHud-Vulkan-Layer via Flatpak...${NC}"
+    flatpak install flathub org.freedesktop.Platform.VulkanLayer.MangoHud -y
 
-    # 2. PPA hinzufügen (von gezakovacs)
-    echo -e "${YELLOW}-> Füge das MangoHud PPA hinzu...${NC}"
-    add-apt-repository ppa:gezakovacs/ppa -y
-
-    # 3. Paketlisten aktualisieren
-    echo -e "${YELLOW}-> Aktualisiere Paketlisten...${NC}"
-    apt update
-
-    # 4. Installation von MangoHud und GOverlay
-    echo -e "${YELLOW}-> Installiere MangoHud, 32-Bit-Bibliotheken und GOverlay...${NC}"
-    apt install mangohud lib32-mangohud goverlay -y
+    # 2. Installation von GOverlay (Konfigurationstool) via Flatpak
+    echo -e "${YELLOW}-> Installiere GOverlay via Flatpak...${NC}"
+    flatpak install flathub com.leinardi.goverlay -y
 
     echo -e "${GREEN}MangoHud und GOverlay installiert.${NC}"
-    echo -e "${YELLOW}    NUTZUNG: 'mangohud %command%' in Steam-Startoptionen.${NC}"
+    echo -e "${RED}WICHTIG: Nutzen Sie Flatpak-Startoptionen in Steam!${NC}"
+    echo -e "${YELLOW}    NUTZUNG: 'flatpak run --env=MANGOHUD=1 org.freedesktop.Platform.VulkanLayer.MangoHud %command%' in Steam-Startoptionen.${NC}"
 else
     echo "MangoHud und GOverlay übersprungen."
 fi
