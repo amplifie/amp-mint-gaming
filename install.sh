@@ -154,9 +154,20 @@ else
     echo "MangoHud übersprungen."
 fi
 
+# Optional: PulseAudio Volume Control (pavucontrol)
+echo -e "\n${YELLOW}--- OPTIONALE INSTALLATION: PulseAudio Volume Control (pavucontrol) ---${NC}"
+echo "Dies ist ein grafischer Mixer zur Verwaltung von Audio-Ein-/Ausgängen, Streams und Soundkarten-Profilen und eine Sinnvolle Alternative zum Alsamixer"
+read -p "Möchten Sie PulseAudio installieren? (j/n): " pavucontrol_choice
+if [[ "$pavucontrol_choice" == "j" || "$pavucontrol_choice" == "J" ]]; then
+    apt install pavucontrol -y
+    echo "PulseAudio installiert."
+else
+    echo "PulseAudio übersprungen."
+fi
+
 # Optional: Lutris
 echo -e "\n${YELLOW}--- OPTIONALE INSTALLATION: LUTRIS ---${NC}"
-echo "Launcher für Epic, GOG, Battle.net."
+echo "Launcher für Epic, GOG und Battle.net."
 read -p "Möchten Sie Lutris installieren? (j/n): " lutris_choice
 if [[ "$lutris_choice" == "j" || "$lutris_choice" == "J" ]]; then
     add-apt-repository ppa:lutris-team/lutris -y
@@ -176,7 +187,7 @@ else
 fi
 
 # OBLIGATORISCH: ProtonUp-Qt
-echo -e "\n${GREEN}Installiere ProtonUp-Qt via Flatpak (obligatorisch)...${NC}"
+echo -e "\n${GREEN}Installiere ProtonUp-Qt via Flatpak ...${NC}"
 flatpak install flathub net.davidotek.GtkSharpInstaller -y
 
 # ---------------------------------------------------------
@@ -229,7 +240,8 @@ else
 fi
 
 # 4. CPU Governor (Performance)
-if [ -f /etc/default/cpufrequtils ] || [ "$cpufreq_choice" == "j" ] || [ "$cpufreq_choice" == "J" ]; then
+# Wird nur ausgeführt, wenn cpufrequtils installiert wurde
+if [ -f /etc/default/cpufrequtils ] || ([ -n "$cpufreq_choice" ] && [[ "$cpufreq_choice" == "j" || "$cpufreq_choice" == "J" ]]); then
     if [ -f /etc/default/cpufrequtils ]; then
         sed -i 's/^GOVERNOR.*/GOVERNOR="performance"/' /etc/default/cpufrequtils
     else
@@ -237,6 +249,8 @@ if [ -f /etc/default/cpufrequtils ] || [ "$cpufreq_choice" == "j" ] || [ "$cpufr
     fi
     systemctl restart cpufrequtils 2>/dev/null || true
     echo "CPU Governor auf 'performance' gesetzt."
+else
+    echo "CPU Governor-Einstellung übersprungen (cpufrequtils wurde nicht installiert)."
 fi
 
 # ---------------------------------------------------------
